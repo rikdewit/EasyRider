@@ -11,6 +11,14 @@ export type InstrumentId =
   | "trumpet"
   | "other";
 
+export type MicId =
+  | "vocal-standard"
+  | "vocal-condenser"
+  | "instrument-dynamic"
+  | "overhead-condenser"
+  | "di-box"
+  | "other";
+
 export interface InstrumentOption {
   id: InstrumentId;
   label: string;
@@ -32,20 +40,53 @@ export const INSTRUMENTS: InstrumentOption[] = [
   { id: "other", label: "Overig", micSuggestion: "In overleg", needsDI: false },
 ];
 
+export interface MicOption {
+  id: MicId;
+  label: string;
+}
+
+export const MICS: MicOption[] = [
+  { id: "vocal-standard", label: "Zangmic met standaard (SM58 e.d.)" },
+  { id: "vocal-condenser", label: "Condenser zangmic" },
+  { id: "instrument-dynamic", label: "Instrumentmic (SM57 e.d.)" },
+  { id: "overhead-condenser", label: "Overhead / room mic" },
+  { id: "di-box", label: "DI-box" },
+  { id: "other", label: "Overig / in overleg" },
+];
+
+export interface MemberInstrument {
+  id: string;
+  instrumentId: InstrumentId;
+  micId: MicId;
+}
+
 export interface BandMember {
   id: string;
   name: string;
-  instrumentId: InstrumentId;
+  instruments: MemberInstrument[];
   notes?: string;
 }
 
 export interface StagePosition {
   id: string;
   memberId: string;
+  memberInstrumentId: string;
+  instrumentId: InstrumentId;
   x: number; // 0–100 percentage
   y: number;
   label: string;
-  hasMonitor: boolean;
+}
+
+export interface StageMonitor {
+  id: string;
+  memberId: string;
+  x: number; // 0–100 percentage
+  y: number;
+  /**
+   * Monitor-mix per input:
+   * key = memberInstrument.id, value = niveau in procenten (0–100)
+   */
+  mix: Record<string, number>;
 }
 
 export interface RiderInfo {

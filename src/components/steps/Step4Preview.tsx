@@ -6,7 +6,7 @@ import { INSTRUMENTS } from "@/types/rider";
 
 export function Step4Preview() {
   const previewRef = useRef<HTMLDivElement>(null);
-  const { bandMembers, stagePositions, riderInfo } = useRiderStore();
+  const { bandMembers, stagePositions, monitors, riderInfo } = useRiderStore();
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -59,17 +59,31 @@ export function Step4Preview() {
               </tr>
             </thead>
             <tbody>
-              {bandMembers.map((m, i) => {
-                const inst = INSTRUMENTS.find((x) => x.id === m.instrumentId)!;
-                return (
-                  <tr key={m.id} className="border-b border-slate-100">
-                    <td className="py-1.5 font-mono text-slate-600">{i + 1}</td>
-                    <td className="py-1.5">{m.name || "—"}</td>
-                    <td className="py-1.5">{inst.micSuggestion}</td>
-                    <td className="py-1.5 text-slate-600">{m.notes || "—"}</td>
-                  </tr>
-                );
-              })}
+              {bandMembers.flatMap((member) =>
+                member.instruments.map((instEntry) => {
+                  const instOpt = INSTRUMENTS.find(
+                    (x) => x.id === instEntry.instrumentId,
+                  );
+                  return { member, instEntry, instOpt };
+                }),
+              ).map((row, index) => (
+                <tr key={row.instEntry.id} className="border-b border-slate-100">
+                  <td className="py-1.5 font-mono text-slate-600">
+                    {index + 1}
+                  </td>
+                  <td className="py-1.5">
+                    {row.member.name || "—"}{" "}
+                    {row.instOpt ? `(${row.instOpt.label})` : ""}
+                  </td>
+                  <td className="py-1.5">
+                    {/* eenvoudige beschrijving, mic-keuze staat eerder in het formulier */}
+                    {row.instOpt?.micSuggestion}
+                  </td>
+                  <td className="py-1.5 text-slate-600">
+                    {row.member.notes || "—"}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>
@@ -86,15 +100,27 @@ export function Step4Preview() {
             {stagePositions.map((pos) => (
               <div
                 key={pos.id}
-                className="absolute rounded border-2 border-slate-500 bg-white px-2 py-1 text-center text-xs font-medium text-slate-800 print:border-black"
+                className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center text-xs font-medium text-slate-800"
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
-                  width: "22%",
                 }}
               >
-                {pos.label}
-                {pos.hasMonitor && " (mon)"}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-500 bg-white print:bg-white">
+                  <span className="text-[10px]">{pos.label || "Persoon"}</span>
+                </div>
+              </div>
+            ))}
+            {monitors.map((mon) => (
+              <div
+                key={mon.id}
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-sm border border-slate-600 bg-slate-800 px-1 text-[9px] font-semibold uppercase tracking-wide text-slate-100 print:bg-black"
+                style={{
+                  left: `${mon.x}%`,
+                  top: `${mon.y}%`,
+                }}
+              >
+                Mon
               </div>
             ))}
           </div>
